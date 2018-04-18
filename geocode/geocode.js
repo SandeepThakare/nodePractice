@@ -1,6 +1,6 @@
 const request = require('request');
 
-var geocodeAddress = (address) => {
+var geocodeAddress = (address, callback) => {
     var encodedAddress = encodeURIComponent(address);
     console.log(`Encoded Address - ${encodedAddress}`);
 
@@ -10,15 +10,20 @@ var geocodeAddress = (address) => {
     }, (error, response, body) => {
         console.log(body);
         if (error) {
-            console.log('Unable to fetch data - Error JSON ', JSON.stringify(error, null, 2));
+            callback('Unable to fetch data - Error JSON ');
         } else if (body.status === 'ZERO_RESULTS') {
-            console.log('No data found with this address');
+            callback('No data found with this address');
         } else if (body.status === 'OK') {
             // console.log(JSON.stringify(body, undefined, 2));
-            console.log(`Latitude: ${body.results[0].geometry.location.lat}`);
-            console.log(`Longitude: ${body.results[0].geometry.location.lng}`);
+            callback(null, {
+                'address': body.results[0].formatted_address,
+                'latitude': body.results[0].geometry.location.lat,
+                'longitude': body.results[0].geometry.location.lng
+            })
+            // console.log(`Latitude: ${body.results[0].geometry.location.lat}`);
+            // console.log(`Longitude: ${body.results[0].geometry.location.lng}`);
         } else {
-            console.log('Daily quota exceeded')
+            callback('Daily quota exceeded');
         }
     })
 }
